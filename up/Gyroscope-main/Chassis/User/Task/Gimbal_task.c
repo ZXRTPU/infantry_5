@@ -54,8 +54,8 @@ static void Gimbal_loop_Init()
     gimbal_Yaw.angle_target = 0;
 
     gimbal_Pitch.pid_parameter[0] = 60, gimbal_Pitch.pid_parameter[1] = 0, gimbal_Pitch.pid_parameter[2] = 10;
-    gimbal_Pitch.pid_angle_parameter[0] = 1, gimbal_Pitch.pid_angle_parameter[1] = 0, gimbal_Pitch.pid_angle_parameter[2] = 0;
-    gimbal_Pitch.angle_target = 2900;
+    gimbal_Pitch.pid_angle_parameter[0] = 3, gimbal_Pitch.pid_angle_parameter[1] = 0, gimbal_Pitch.pid_angle_parameter[2] = 0;
+    gimbal_Pitch.angle_target = 1000;
 
     // 初始化pid结构体
     pid_init(&gimbal_Yaw.pid, gimbal_Yaw.pid_parameter, 15000, 15000);
@@ -68,17 +68,15 @@ static void Gimbal_loop_Init()
 // 模式选择
 static void mode_select()
 {
-    // if (rc_ctrl.rc.s[0] == 1)
-    // {
-    // 速度模式
-    RC_gimbal_control();
-    // gimbal_yaw_control();
-    // }
-    // else
-    // {
-    // 锁云台模式
-    // gimbal_yaw_control();
-    // }
+    if (rc_ctrl.rc.s[0] == 2)
+    {
+        gimbal_yaw_control();
+    }
+    else
+    {
+        RC_gimbal_control();
+    }
+
 }
 
 // 给电流，CAN1调试用，没板子。。。。。。
@@ -90,7 +88,8 @@ static void gimbal_current_give()
         set_motor_current_gimbal(1, 0, 0, 0, 0);
     else
         set_motor_current_gimbal(1, gimbal_Yaw.motor_info.set_current, 0, 0, 0);
-    set_motor_current_gimbal2(1, 0, 0, gimbal_Pitch.motor_info.set_current, 0);
+        //set_motor_current_gimbal2(1, 0, 0, gimbal_Pitch.motor_info.set_current, 0);
+        set_motor_current_gimbal2(1, gimbal_Pitch.motor_info.set_current, gimbal_Pitch.motor_info.set_current, gimbal_Pitch.motor_info.set_current, gimbal_Pitch.motor_info.set_current);
     // set_curruent(MOTOR_6020_1, hcan1, gimbal_Yaw.motor_info.set_current, 0, 0, 0);
     // set_curruent(MOTOR_6020_1, hcan2, 0, 0, gimbal_Pitch.motor_info.set_current, 0);
 }
@@ -101,6 +100,7 @@ static void RC_gimbal_control()
     RC_Yaw_speed();
     RC_Pitch_control();
 }
+
 
 // 锁云台模式
 static void gimbal_yaw_control()
@@ -126,7 +126,7 @@ static void RC_Yaw_control()
 {
     if (rc_ctrl.rc.ch[0] >= -660 && rc_ctrl.rc.ch[0] <= 660)
     {
-        gimbal_Yaw.angle_target += rc_ctrl.rc.ch[0] / 660.0 * (-0.1);
+        gimbal_Yaw.angle_target = INS.Yaw + rc_ctrl.rc.ch[0] / 660.0 * (-0.1);
 
         detel_calc(&gimbal_Yaw.angle_target);
 
@@ -144,7 +144,7 @@ static void RC_Pitch_control()
     // 1600 < gimbal_Pitch.angle_target < 3400
     if (rc_ctrl.rc.ch[1] >= -660 && rc_ctrl.rc.ch[1] <= 660)
     {
-        gimbal_Pitch.angle_target += rc_ctrl.rc.ch[1] / 660.0 * 0.8;
+        gimbal_Pitch.angle_target -= rc_ctrl.rc.ch[1]/660*(-1) ;
         detel_calc2(&gimbal_Pitch.angle_target);
 
         gimbal_Pitch.speed_target = gimbal_Pitch_PID_cal(&gimbal_Pitch.pid_angle, gimbal_Pitch.motor_info.rotor_angle, gimbal_Pitch.angle_target);
@@ -172,9 +172,11 @@ static void detel_calc2(fp32 *angle)
     else if (*angle < 0)
         *angle += 8192;
 
+    /*
     if (*angle >= MAX_ANGLE)
         *angle = MAX_ANGLE;
 
     else if (*angle <= MIN_ANGLE)
         *angle = MIN_ANGLE;
+        */
 }

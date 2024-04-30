@@ -14,7 +14,7 @@
         }                      \
     }
 
-void pid_init(pid_struct_t *pid, fp32 PID[3], fp32 max_out, fp32 max_iout) // pid½á¹¹Ìå³õÊ¼»¯£¬ºóÁ½¸ö²ÎÊý·Ö±ðÉèÖÃÊä³ö×î´óÖµ£¬»ý·Ö×î´óÖµ
+void pid_init(pid_struct_t *pid, fp32 PID[3], fp32 max_out, fp32 max_iout) // pidç»“æž„ä½“åˆå§‹åŒ–ï¼ŒåŽä¸¤ä¸ªå‚æ•°åˆ†åˆ«è®¾ç½®è¾“å‡ºæœ€å¤§å€¼ï¼Œç§¯åˆ†æœ€å¤§å€¼
 {
     if (pid == NULL || PID == NULL)
     {
@@ -30,7 +30,7 @@ void pid_init(pid_struct_t *pid, fp32 PID[3], fp32 max_out, fp32 max_iout) // pi
     pid->error[0] = pid->error[1] = pid->error[2] = pid->Pout = pid->Iout = pid->Dout = pid->out = 0.0f;
 }
 
-fp32 pid_calc(pid_struct_t *pid, fp32 fdb, fp32 set) // µÚ¶þ¸ö²ÎÊýÎª·´À¡Öµ£¬µÚÈý¸ö²ÎÊýÎªÄ¿±êÖµ
+fp32 pid_calc(pid_struct_t *pid, fp32 fdb, fp32 set) // ç¬¬äºŒä¸ªå‚æ•°ä¸ºåé¦ˆå€¼ï¼Œç¬¬ä¸‰ä¸ªå‚æ•°ä¸ºç›®æ ‡å€¼
 {
     pid->error[1] = pid->error[0];
     pid->set = set;
@@ -49,7 +49,7 @@ fp32 pid_calc(pid_struct_t *pid, fp32 fdb, fp32 set) // µÚ¶þ¸ö²ÎÊýÎª·´À¡Öµ£¬µÚÈý
     return pid->out;
 }
 
-fp32 gimbal_Yaw_PID_calc(pid_struct_t *pid, fp32 fdb, fp32 set) // µÚ¶þ¸ö²ÎÊýÎª·´À¡Öµ£¬µÚÈý¸ö²ÎÊýÎªÄ¿±êÖµ
+fp32 gimbal_Yaw_PID_calc(pid_struct_t *pid, fp32 fdb, fp32 set) // ç¬¬äºŒä¸ªå‚æ•°ä¸ºåé¦ˆå€¼ï¼Œç¬¬ä¸‰ä¸ªå‚æ•°ä¸ºç›®æ ‡å€¼
 {
     fp32 err;
     pid->error[1] = pid->error[0];
@@ -80,7 +80,7 @@ fp32 gimbal_Yaw_PID_calc(pid_struct_t *pid, fp32 fdb, fp32 set) // µÚ¶þ¸ö²ÎÊýÎª·
     return pid->out;
 }
 
-fp32 gimbal_Pitch_PID_cal(pid_struct_t *pid, fp32 fdb, fp32 set) // µÚ¶þ¸ö²ÎÊýÎª·´À¡Öµ£¬µÚÈý¸ö²ÎÊýÎªÄ¿±êÖµ
+fp32 gimbal_Pitch_PID_cal(pid_struct_t *pid, fp32 fdb, fp32 set) // ç¬¬äºŒä¸ªå‚æ•°ä¸ºåé¦ˆå€¼ï¼Œç¬¬ä¸‰ä¸ªå‚æ•°ä¸ºç›®æ ‡å€¼
 {
     fp32 err;
     pid->error[1] = pid->error[0];
@@ -88,11 +88,11 @@ fp32 gimbal_Pitch_PID_cal(pid_struct_t *pid, fp32 fdb, fp32 set) // µÚ¶þ¸ö²ÎÊýÎª
     pid->fdb = fdb;
     err = set - fdb;
 
-    if (err > 8191 / 2)
+    if (err > 8191/2 )
     {
         err -= 8191;
     }
-    else if (err < -8191 / 2)
+    else if (err < -8192/2)
     {
         err += 8191;
     }
@@ -110,12 +110,12 @@ fp32 gimbal_Pitch_PID_cal(pid_struct_t *pid, fp32 fdb, fp32 set) // µÚ¶þ¸ö²ÎÊýÎª
     LimitMax(pid->out, pid->max_out);
     return pid->out;
 }
-fp32 pid_calc_trigger(pid_struct_t *pid, fp32 ref, fp32 fdb) // refÊÇÄ¿±êÖµ,fdbÊÇµç»ú½âÂëµÄËÙ¶È·µ»ØÖµ
+fp32 pid_calc_trigger(pid_struct_t *pid, fp32 ref, fp32 fdb) // refæ˜¯ç›®æ ‡å€¼,fdbæ˜¯ç”µæœºè§£ç çš„é€Ÿåº¦è¿”å›žå€¼
 {
     pid->ref = ref;
     pid->fdb = fdb;
-    pid->error[1] = pid->error[0];         // err[1]ÊÇÉÏÒ»´Î¼ÆËã³öÀ´µÄ²îÖµ
-    pid->error[0] = pid->ref - pid->fdb; // err[0]ÊÇÕâÒ»´ÎµÄÔ¤ÆÚËÙ¶ÈºÍÊµ¼ÊËÙ¶ÈµÄ²îÖµ,ÕâÁ½¸öÖµÊÇ¿ÉÒÔÊÇ¸ºÊýµÄ
+    pid->error[1] = pid->error[0];         // err[1]æ˜¯ä¸Šä¸€æ¬¡è®¡ç®—å‡ºæ¥çš„å·®å€¼
+    pid->error[0] = pid->ref - pid->fdb; // err[0]æ˜¯è¿™ä¸€æ¬¡çš„é¢„æœŸé€Ÿåº¦å’Œå®žé™…é€Ÿåº¦çš„å·®å€¼,è¿™ä¸¤ä¸ªå€¼æ˜¯å¯ä»¥æ˜¯è´Ÿæ•°çš„
 
     if (pid->error[0] > 4096)
         pid->error[0] -= 8191;
@@ -125,9 +125,9 @@ fp32 pid_calc_trigger(pid_struct_t *pid, fp32 ref, fp32 fdb) // refÊÇÄ¿±êÖµ,fdbÊ
     pid->Pout = pid->Kp * pid->error[0];
     pid->Iout += pid->Ki * pid->error[0];
     pid->Dout = pid->Kd * (pid->error[0] - pid->error[1]);
-    LimitMax(pid->Iout, pid->max_iout); // ·ÀÖ¹Ô½½ç
+    LimitMax(pid->Iout, pid->max_iout); // é˜²æ­¢è¶Šç•Œ
 
     pid->out = pid->Pout + pid->Iout + pid->Dout;
-    LimitMax(pid->out, pid->max_out); // ·ÀÖ¹Ô½½ç
-    return pid->out;                  // µç»ú·µ»ØµÄ±¨ÎÄÓÐ×ªËÙºÍ×ª¾ØµçÁ÷£¬µ«ÊÇÖ»ÄÜ·¢µçÑ¹Öµ(-30000ÖÁ30000)
+    LimitMax(pid->out, pid->max_out); // é˜²æ­¢è¶Šç•Œ
+    return pid->out;                  // ç”µæœºè¿”å›žçš„æŠ¥æ–‡æœ‰è½¬é€Ÿå’Œè½¬çŸ©ç”µæµï¼Œä½†æ˜¯åªèƒ½å‘ç”µåŽ‹å€¼(-30000è‡³30000)
 }
